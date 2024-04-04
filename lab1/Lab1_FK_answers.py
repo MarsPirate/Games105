@@ -62,6 +62,8 @@ def part2_forward_kinematics(joint_name, joint_parent, joint_offset, motion_data
         g_pos = []
         g_rot = []
         for cur_i in range(len(joint_parent)):
+            joint = joint_name[cur_i]
+            print("===", joint)
             Pi = root_pos
             Qi = np.array([0, 0, 0])
             # 根骨骼
@@ -74,23 +76,24 @@ def part2_forward_kinematics(joint_name, joint_parent, joint_offset, motion_data
             # Qi = R0*R1*...*Ri
             while cur_i != -1:
                 # calculate Qi from local to parent
-                start = 6+(cur_i-1)*3
+                start = 3 + cur_i*3
                 Ri = frame_data[start: start + 3]
                 Qi = R.from_matrix(np.dot(R.from_euler("XYZ", Ri, degrees=True).as_matrix(), R.from_euler("XYZ", Qi, degrees=True).as_matrix())).as_euler("XYZ", degrees=True)
                 # calculate Pi from local to parent
+                # TODO: 这里有些问题？？？
                 Ri_1_index = joint_parent[cur_i]
-                start = 6 + (Ri_1_index-1) * 3
-                Ri_1 = frame_data[start: start+3]
-                Li_1 = joint_offset[cur_i]
-                Pi = Pi + np.dot(R.from_euler("XYZ", Ri_1, degrees=True).as_matrix(), Li_1)
+                if Ri_1_index != -1:
+                    start = 3 + Ri_1_index * 3
+                    Ri_1 = frame_data[start: start+3]
+                    Li_1 = joint_offset[cur_i]
+                    Pi = Pi + np.dot(R.from_euler("XYZ", Ri_1, degrees=True).as_matrix(), Li_1)
                 # next iteration
                 cur_i = Ri_1_index
             g_pos.append(Pi)
             g_rot.append(Qi)
         tmp_rot = []
         for rot in g_rot:
-            q: np.ndarray = R.from_euler("XYZ", rot, degrees=True).as_quat()
-            N = np.linalg.norm(q)
+            q = R.from_euler("XYZ", rot, degrees=True).as_quat()
             tmp_rot.append(q)
         g_rot = tmp_rot
         return np.array(g_pos), np.array(g_rot)
