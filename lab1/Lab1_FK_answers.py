@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.spatial.transform import Rotation as R
 
+
 def load_motion_data(bvh_file_path):
     """part2 辅助函数，读取bvh文件"""
     with open(bvh_file_path, 'r') as f:
@@ -13,10 +14,9 @@ def load_motion_data(bvh_file_path):
             data = [float(x) for x in line.split()]
             if len(data) == 0:
                 break
-            motion_data.append(np.array(data).reshape(1,-1))
+            motion_data.append(np.array(data).reshape(1, -1))
         motion_data = np.concatenate(motion_data, axis=0)
     return motion_data
-
 
 
 def part1_calculate_T_pose(bvh_file_path):
@@ -30,9 +30,14 @@ def part1_calculate_T_pose(bvh_file_path):
     Tips:
         joint_name顺序应该和bvh一致
     """
-    joint_name = None
-    joint_parent = None
-    joint_offset = None
+    from bvh import BvhNode, Bvh
+
+    with open(bvh_file_path) as f:
+        mocap = Bvh(f.read())
+
+    joint_name = [joint.name for joint in mocap.get_joints()]
+    joint_parent = [mocap.joint_parent_index(joint.name) for joint in mocap.get_joints()]
+    joint_offset = np.array([mocap.joint_offset(joint.name) for joint in mocap.get_joints()])
     return joint_name, joint_parent, joint_offset
 
 

@@ -11,5 +11,12 @@
             "module": "task0_test_environment",
             "cwd": "${workspaceFolder}/lab1"
         },
+        {
+            "name": "lab1_task1",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "task1_forward_kinematics",
+            "cwd": "${workspaceFolder}/lab1"
+        },
     ]
 }
